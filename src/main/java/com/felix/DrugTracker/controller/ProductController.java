@@ -30,6 +30,7 @@ public class ProductController {
         }
     }
 
+
     @PostMapping("/addBlock")
     public ResponseEntity<Block> addBlock(@RequestParam String productId, @RequestParam String data) {
         try {
@@ -50,7 +51,6 @@ public class ProductController {
         }
     }
 
-    
 
 
 }

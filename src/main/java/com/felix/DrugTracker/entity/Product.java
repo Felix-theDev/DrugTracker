@@ -5,6 +5,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
@@ -17,6 +18,10 @@ public class Product {
     private String batchNumber;
     private String uniqueId;
 
+    private LocalDate manufactureDate;
+
+    private LocalDate expiryDate;
+
     private String qrCode;
 
     // Constructor
@@ -24,10 +29,12 @@ public class Product {
     public Product(){
 
     }
-    public Product(String name, String serialNumber, String batchNumber) {
+    public Product(String name, String serialNumber, String batchNumber, LocalDate manufactureDate, LocalDate expiryDate) {
         this.name = name;
         this.serialNumber = serialNumber;
         this.batchNumber = batchNumber;
+        this.manufactureDate = manufactureDate;
+        this.expiryDate = expiryDate;
         this.uniqueId = generateUniqueId(name, serialNumber, batchNumber);
     }
 
@@ -74,6 +81,22 @@ public class Product {
 
     public String getUniqueId() {
         return uniqueId;
+    }
+
+    public LocalDate getManufactureDate() {
+        return manufactureDate;
+    }
+
+    public void setManufactureDate(LocalDate manufactureDate) {
+        this.manufactureDate = manufactureDate;
+    }
+
+    public LocalDate getExpiryDate() {
+        return expiryDate;
+    }
+
+    public void setExpiryDate(LocalDate expiryDate) {
+        this.expiryDate = expiryDate;
     }
 
     public void setUniqueId(String uniqueId) {

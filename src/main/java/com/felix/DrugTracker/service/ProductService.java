@@ -3,9 +3,12 @@ package com.felix.DrugTracker.service;
 import com.felix.DrugTracker.Repository.ProductRepository;
 import com.felix.DrugTracker.entity.Block;
 import com.felix.DrugTracker.entity.Product;
+import com.felix.DrugTracker.entity.User;
 import com.felix.DrugTracker.util.CryptoUtil;
 import com.felix.DrugTracker.util.QRCodeGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -13,7 +16,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.List;
 
 @Service
@@ -25,9 +27,13 @@ public class ProductService {
    @Autowired
    BlockchainService blockchainService;
 
-    public ProductService(ProductRepository productRepository, BlockchainService blockchainService) {
+   @Autowired
+   UserService userService;
+
+    public ProductService(ProductRepository productRepository, BlockchainService blockchainService, UserService userService) {
         this.productRepository = productRepository;
         this.blockchainService = blockchainService;
+        this.userService = userService;
 
     }
 
@@ -64,7 +70,7 @@ public class ProductService {
         }
         // Create a genesis block for the new product
         try {
-            Block genesisBlock = new Block("Manufacturer: " + product.getName(), "0");
+            Block genesisBlock = new Block("Manufacturer: " + product.getName(), "0", getCurrentUser());
 //        blockchainService.addBlock(product.getId().toString(), genesisBlock);
             blockchainService.addBlock(product.getUniqueId(), genesisBlock);
 
@@ -79,12 +85,25 @@ public class ProductService {
     public Block addBlock(String productId, String data) {
         List<Block> blockchain = blockchainService.getBlockchain(productId);
         String previousHash = blockchain.isEmpty() ? "0" : blockchain.get(blockchain.size() - 1).getHash();
-        Block newBlock = new Block(data, previousHash);
+        Block newBlock = new Block(data, previousHash, getCurrentUser());
         blockchainService.addBlock(productId, newBlock);
 
         return newBlock;
     }
 
+    private User getCurrentUser() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String username = principal instanceof UserDetails ? ((UserDetails) principal).getUsername() : principal.toString();
+        return userService.findByUsername(username);
+    }
+
+    public Product findProduct(String uniqueId){
+        Product product = null;
+        if(uniqueId != null && !uniqueId.isEmpty()){
+            product = productRepository.findByUniqueId(uniqueId);
+        }
+        return product;
+    }
     public Product processScannedQRCodeData(String encryptedData) throws Exception {
         // Decrypt the scanned data to get the uniqueId
         byte[] data  = CryptoUtil.decrypt("YourSecretKey", encryptedData.getBytes());
@@ -93,7 +112,7 @@ public class ProductService {
 
         System.out.println("Unique id is " + uniqueId + " Class is: " + getClass().getName());
         // Use the uniqueId to retrieve product information
-        Product product = productRepository.findByUniqueId(uniqueId);
+        Product product = findProduct(uniqueId);
 
         return product;
     }

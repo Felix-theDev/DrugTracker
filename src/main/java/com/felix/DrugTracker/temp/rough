@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Add Block</title>
+</head>
+<body>
+    <h1>Add Block</h1>
+    <form th:action="@{/addBlock}" method="post">
+        <label for="productId">Product ID:</label>
+        <input type="text" id="productId" name="productId" required/><br/>
+        
+        <label for="data">Data:</label>
+        <input type="text" id="data" name="data" required/><br/>
+        
+        <label for="role">Role:</label>
+        <input type="text" id="role" name="role" value="${#authentication.principal.userRole}" readonly/><br/>
+        
+        <button type="submit">Add Block</button>
+    </form>
+</body>
+</html>
+
+
+@GetMapping("/addBlock")
+    public String showAddBlockForm(Model model) {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String username = principal instanceof UserDetails ? ((UserDetails) principal).getUsername() : principal.toString();
+        model.addAttribute("username", username);
+        model.addAttribute("userRole", getCurrentUserRole());
+        return "addBlock";
+    }
+
+
+    private String getCurrentUserRole() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String username = principal instanceof UserDetails ? ((UserDetails) principal).getUsername() : principal.toString();
+        User user = userService.findByUsername(username);
+        return user != null ? user.getRole() : null;
+    }
