@@ -5,7 +5,7 @@ import com.felix.DrugTracker.entity.Block;
 import com.felix.DrugTracker.entity.Product;
 import com.felix.DrugTracker.entity.User;
 import com.felix.DrugTracker.util.CryptoUtil;
-import com.felix.DrugTracker.util.QRCodeGenerator;
+import com.felix.DrugTracker.util.QRCodeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -57,12 +57,11 @@ public class ProductService {
             // Handle directory creation failure if necessary
         }
 
-
-        try {
+   try {
             String encryptedData = CryptoUtil.encryptToBase64("YourSecretKey", uniqueId);
             System.out.println("The encrypted data is " + encryptedData);
             String qrCodePath = "path/to/qrcodes/" + product.getName() + ".png";
-            QRCodeGenerator.generateQRCodeImage(encryptedData, 250, 250, qrCodePath);
+            QRCodeUtil.generateQRCodeImage(encryptedData, 250, 250, qrCodePath);
             product.setQrCode(qrCodePath);
             savedProduct = productRepository.save(product);
         } catch (Exception e) {
@@ -70,7 +69,7 @@ public class ProductService {
         }
         // Create a genesis block for the new product
         try {
-            Block genesisBlock = new Block("Manufacturer: " + product.getName(), "0", getCurrentUser());
+            Block genesisBlock = new Block(product.getName(), "0", getCurrentUser());
 //        blockchainService.addBlock(product.getId().toString(), genesisBlock);
             blockchainService.addBlock(product.getUniqueId(), genesisBlock);
 
@@ -94,6 +93,7 @@ public class ProductService {
     private User getCurrentUser() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String username = principal instanceof UserDetails ? ((UserDetails) principal).getUsername() : principal.toString();
+        System.out.println("Username is " + username);
         return userService.findByUsername(username);
     }
 
@@ -104,16 +104,28 @@ public class ProductService {
         }
         return product;
     }
-    public Product processScannedQRCodeData(String encryptedData) throws Exception {
-        // Decrypt the scanned data to get the uniqueId
-        byte[] data  = CryptoUtil.decrypt("YourSecretKey", encryptedData.getBytes());
+    public Product processScannedQRCodeData(String encryptedData) {
+        try {
+            // Decrypt the scanned data to get the uniqueId
+            String uniqueId = CryptoUtil.decryptFromBase64("YourSecretKey", encryptedData);
+            System.out.println("The unique id is " + uniqueId);
+            // Check if the uniqueId is valid
+            if (uniqueId.trim().isEmpty()) {
+                // If the uniqueId is invalid, return null
+                return null;
+            }
 
-        String uniqueId = Arrays.toString(data);
+            System.out.println("Unique id is " + uniqueId + " Class is: " + getClass().getName());
+            // Use the uniqueId to retrieve product information
+            Product product = findProduct(uniqueId);
 
-        System.out.println("Unique id is " + uniqueId + " Class is: " + getClass().getName());
-        // Use the uniqueId to retrieve product information
-        Product product = findProduct(uniqueId);
-
-        return product;
+            // Return the product if found, otherwise return null
+            return product;
+        } catch (Exception e) {
+            // Handle exceptions that occur during decryption
+            System.out.println("Error during decryption: " + e.getMessage());
+            return null;
+        }
     }
+
 }

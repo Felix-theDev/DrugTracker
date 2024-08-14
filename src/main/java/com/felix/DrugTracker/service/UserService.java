@@ -23,11 +23,12 @@ public class UserService implements UserDetailsService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public User registerUser(String username, String password, String role) {
+    public User registerUser(String username, String password, String role, String email) {
         User user = new User();
         user.setUsername(username);
         user.setPassword(passwordEncoder.encode(password));
         user.setRole(role);
+        user.setEmail(email);
         return userRepository.save(user);
     }
 

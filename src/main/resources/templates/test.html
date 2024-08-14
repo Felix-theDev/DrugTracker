@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Product Search</title>
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+        .card {
+            max-width: 500px;
+            margin: auto;
+        }
+        .upload-btn-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+        .btn-primary {
+            border: none;
+            color: white;
+            background-color: #007bff;
+            padding: 8px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .upload-btn-wrapper input[type=file] {
+            font-size: 100px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+        }
+        .footer-space {
+            margin-bottom: 50px;
+        }
+    </style>
+</head>
+<body>
+<!-- Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <a class="navbar-brand" href="#">MyApp</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarNav">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item">
+        <a class="nav-link" href="#">Add Details</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Check Products</a>
+      </li>
+    </ul>
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a class="nav-link" href="#">Logout</a>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<!-- Main Content -->
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-md-8 text-center mt-5">
+      <h1>Search for a Product</h1>
+      <!-- Search Text Box -->
+      <form class="form-inline mt-4" method="GET" action="/search">
+        <input class="form-control mr-sm-2 w-75" type="search" placeholder="Enter product code" aria-label="Search" name="query">
+        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+      </form>
+      <!-- Upload Image -->
+      <form class="mt-4" method="POST" action="/scanQRCode" enctype="multipart/form-data" id="uploadImage">
+        <div class="upload-btn-wrapper">
+          <button type="button" class="btn btn-primary btn-lg" id="scanQRButton">Scan QR</button>
+          <input type="file" id="productImage" name="image" style="display: none;">
+        </div>
+      </form>
+      <!-- Display Product Information -->
+      <div id="productInfo" class="mt-5">
+        <!-- Product information will be updated here dynamically -->
+      </div>
+      <!-- Add some space at the bottom -->
+      <div class="footer-space"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.6/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.min.js"></script>
+<!-- MDB JS (if using) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.1.0/mdb.min.js"></script>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("DOM content loaded and script is running.");
+
+        const scanQRButton = document.getElementById('scanQRButton');
+        const productImage = document.getElementById('productImage');
+        const uploadForm = document.getElementById('uploadImage');
+
+        scanQRButton.addEventListener('click', function() {
+            console.log("Scan QR button clicked.");
+            productImage.click(); // Trigger file picker
+        });
+
+        productImage.addEventListener('change', function() {
+            console.log("File input changed.");
+            if (productImage.files.length > 0) {
+                console.log("File selected, preparing to upload.");
+                const formData = new FormData(uploadForm);
+                fetch('/scanQRCode', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    console.log("Response received.");
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Data received:", data);
+                    if (data.product) {
+                        const productInfo = document.getElementById('productInfo');
+                        productInfo.innerHTML = `
+                            <h2>Product Information</h2>
+                            <div class="card">
+                                <div class="card-body">
+                                    <p><strong>Product Name:</strong> ${data.product.name}</p>
+                                    <p><strong>Manufacturing Date:</strong> ${data.product.manufacturingDate}</p>
+                                    <p><strong>Expiry Date:</strong> ${data.product.expiryDate}</p>
+                                    <p><strong>Timeline Journey:</strong></p>
+                                    <ul>
+                                        ${data.product.timeline.map(event => `<li>${event}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    alert('Error uploading image.');
+                    console.error('Error:', error);
+                });
+            }
+        });
+    });
+</script>
+
+
+</body>
+</html>

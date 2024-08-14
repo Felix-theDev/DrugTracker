@@ -16,7 +16,7 @@ import java.util.Map;
 public class BlockchainService {
 
     @Autowired
-    private BlockchainRepository blockchainRepository;
+    private final BlockchainRepository blockchainRepository;
     public static Map<String, List<Block>> blockchains = new HashMap<>();
     public static int difficulty = 5;
 
@@ -27,6 +27,7 @@ public class BlockchainService {
     // Method to get the blockchain for a product ID
     public List<Block> getBlockchain(String productId) {
         Blockchain blockchain = blockchainRepository.findByProductId(productId);
+        System.out.println("Component block chain is " +  blockchain);
         return blockchain != null ? blockchain.getBlocks() : null;
     }
 

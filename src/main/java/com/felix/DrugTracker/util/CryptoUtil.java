@@ -30,6 +30,12 @@ public class CryptoUtil {
         return cipher.doFinal(data);
     }
 
+    public static String decryptFromBase64(String key, String base64Data) throws Exception {
+        byte[] decodedData = Base64.getDecoder().decode(base64Data);
+        byte[] decryptedData = decrypt(key, decodedData);
+        return new String(decryptedData);
+    }
+
     private static SecretKeySpec generateKey(String key) {
         byte[] keyBytes = Arrays.copyOf(key.getBytes(), 16); // Adjust to 16 bytes (128 bits) for AES-128
         return new SecretKeySpec(keyBytes, ALGORITHM);

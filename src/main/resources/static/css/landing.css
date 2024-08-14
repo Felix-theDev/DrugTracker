@@ -1,0 +1,46 @@
+/* styles.css */
+.card {
+    max-width: 500px;
+    margin: auto;
+}
+.upload-btn-wrapper {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+}
+.btn-primary {
+    border: none;
+    color: white;
+    background-color: #007bff;
+    padding: 8px 20px;
+    font-size: 16px;
+    cursor: pointer;
+}
+.upload-btn-wrapper input[type=file] {
+    font-size: 100px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+}
+.qr-btn {
+    background-color: #17a2b8;
+    color: white;
+    padding: 8px 20px;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    border: none;
+    cursor: pointer;
+}
+.qr-icon {
+    width: 25px;
+    height: 25px;
+    margin-right: 8px;
+}
+.qr-btn:hover {
+    background-color: #138496;
+}
+.footer-space {
+    margin-bottom: 50px;
+}

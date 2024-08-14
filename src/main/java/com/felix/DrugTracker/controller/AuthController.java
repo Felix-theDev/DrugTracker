@@ -33,7 +33,7 @@ public class AuthController  {
     @PostMapping("/register")
     public String registerUser(@ModelAttribute User user) {
         user.setPassword(user.getPassword());
-        userService.registerUser(user.getUsername(), user.getPassword(), user.getRole());
+        userService.registerUser(user.getUsername(), user.getPassword(), user.getRole(), user.getEmail());
         return "redirect:/login";
     }
 
@@ -45,7 +45,8 @@ public class AuthController  {
     @GetMapping("/home")
     public String loginUser() {
         System.out.println("success logging in");
-        return "redirect:/login";
+        return "landing";
 
     }
+
 }

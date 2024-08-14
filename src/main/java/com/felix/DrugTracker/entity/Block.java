@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.felix.DrugTracker.util.StringUtil;
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -15,7 +16,7 @@ public class Block {
 
     private String previousHash;
     private String data;
-    private long timeStamp;
+    private LocalDateTime timeStamp;
     private String hash;
 
     private String userRole;
@@ -37,8 +38,9 @@ public class Block {
         this.data = data;
         this.previousHash = previousHash;
         this.user = user;
-        this.timeStamp = new Date().getTime();
+        this.timeStamp = LocalDateTime.now();
         this.hash = calculateHash();
+        setUserRole();
 
     }
 
@@ -66,8 +68,8 @@ public class Block {
         return userRole;
     }
 
-    public void setUserRole(String userRole) {
-        this.userRole = userRole;
+    public void setUserRole() {
+        this.userRole = user.getRole();
     }
 
     public User getUser() {
@@ -76,6 +78,10 @@ public class Block {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public LocalDateTime getTimeStamp() {
+        return timeStamp;
     }
 
     public Blockchain getBlockchain() {

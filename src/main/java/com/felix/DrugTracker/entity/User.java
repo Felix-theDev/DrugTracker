@@ -16,6 +16,8 @@ public class User {
     private String password;
     private String role;  // e.g., "MANUFACTURER", "RETAILER"
 
+    private String email;
+
     // Getters and setters
     public Long getId() {
         return id;
@@ -47,5 +49,13 @@ public class User {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }
